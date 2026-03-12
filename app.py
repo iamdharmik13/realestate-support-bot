@@ -8,7 +8,7 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 with open("knowledge.txt", "r") as f:
     knowledge = f.read()
-
+    
 model = genai.GenerativeModel("gemini-2.0-flash")
 
 SYSTEM_PROMPT = f"""
