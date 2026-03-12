@@ -3,122 +3,629 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Real Estate Assistant</title>
+<title>Dream Home Realty</title>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Inter',sans-serif; background:#f0f4f8; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-  .chat-box { width:420px; height:620px; background:white; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,0.12); display:flex; flex-direction:column; overflow:hidden; }
-  .header { background:linear-gradient(135deg,#1a3c5e,#2d6a9f); padding:20px 24px; color:white; }
-  .header-top { display:flex; align-items:center; gap:12px; }
-  .avatar { width:44px; height:44px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; }
-  .header h2 { font-size:1rem; font-weight:600; }
-  .header p { font-size:0.75rem; opacity:0.8; margin-top:2px; }
-  .status { display:flex; align-items:center; gap:6px; margin-top:10px; font-size:0.75rem; opacity:0.9; }
-  .dot { width:8px; height:8px; background:#00e5a0; border-radius:50%; animation:pulse 1.5s infinite; }
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-  .messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
-  .messages::-webkit-scrollbar{width:4px}
-  .messages::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px}
-  .msg { max-width:82%; padding:11px 15px; border-radius:18px; font-size:0.86rem; line-height:1.55; }
-  .bot { background:#f0f4f8; color:#1a1a2e; border-bottom-left-radius:4px; align-self:flex-start; }
-  .user { background:linear-gradient(135deg,#1a3c5e,#2d6a9f); color:white; border-bottom-right-radius:4px; align-self:flex-end; }
-  .typing { align-self:flex-start; background:#f0f4f8; padding:11px 16px; border-radius:18px; border-bottom-left-radius:4px; display:none; gap:4px; }
-  .typing span { width:7px; height:7px; background:#999; border-radius:50%; display:inline-block; animation:bounce 1s infinite; }
-  .typing span:nth-child(2){animation-delay:.2s}
-  .typing span:nth-child(3){animation-delay:.4s}
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-  .quick-btns { padding:0 20px 12px; display:flex; gap:8px; flex-wrap:wrap; }
-  .quick-btn { background:#f0f4f8; border:1px solid #dde3ea; color:#1a3c5e; padding:6px 12px; border-radius:20px; font-size:0.75rem; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.2s; font-weight:500; }
-  .quick-btn:hover { background:#1a3c5e; color:white; }
-  .input-row { padding:16px 20px; border-top:1px solid #f0f0f0; display:flex; gap:8px; align-items:center; }
-  input { flex:1; padding:11px 16px; border:1.5px solid #e0e0e0; border-radius:25px; outline:none; font-size:0.86rem; font-family:'Inter',sans-serif; transition:border-color 0.2s; }
-  input:focus { border-color:#2d6a9f; }
-  .send-btn { width:42px; height:42px; background:linear-gradient(135deg,#1a3c5e,#2d6a9f); color:white; border:none; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; flex-shrink:0; }
-  .send-btn:hover{opacity:0.85}
+:root {
+  --cream:  #f5f0e8;
+  --cream2: #ede5d5;
+  --cream3: #ddd0b8;
+  --warm:   #c8a96e;
+  --warm2:  #a8843a;
+  --warm3:  #7a5e28;
+  --dark:   #1a1510;
+  --dark2:  #231e16;
+  --dark3:  #2e271c;
+  --text:   #2a2318;
+  --muted:  #8a7d6a;
+  --light:  #f9f6f0;
+  --sh:     rgba(26,21,16,0.16);
+  --sh2:    rgba(26,21,16,0.07);
+  --r: 22px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; font-family:'Jost',sans-serif; background:var(--dark); }
+
+/* ── CURSOR ── */
+#cd { position:fixed;z-index:9999;pointer-events:none;mix-blend-mode:difference; }
+#cd div { width:10px;height:10px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);transition:width .18s,height .18s; }
+#cr { position:fixed;z-index:9998;pointer-events:none;width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(200,169,110,.65);transform:translate(-50%,-50%);transition:width .3s,height .3s; }
+body:has(.qchip:hover) #cr, body:has(.send-btn:hover) #cr { width:58px;height:58px; }
+
+/* ── BG ── */
+#bg { position:fixed;inset:0;z-index:0;overflow:hidden; }
+.bg-base { position:absolute;inset:0;background:linear-gradient(155deg,#1e1a12 0%,#17130d 40%,#1e1910 65%,#241f14 100%); }
+#bgCanvas { position:absolute;inset:0;width:100%;height:100%; }
+.noise { position:absolute;inset:0;opacity:.28;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='.09'/%3E%3C/svg%3E"); }
+.amb1 { position:absolute;top:-10%;left:5%;width:35%;height:80%;background:linear-gradient(170deg,rgba(255,215,130,.09) 0%,transparent 70%);filter:blur(45px);animation:ambBreath 9s ease-in-out infinite; }
+.amb2 { position:absolute;top:-10%;right:8%;width:28%;height:70%;background:linear-gradient(170deg,rgba(255,225,155,.06) 0%,transparent 65%);filter:blur(55px);animation:ambBreath 12s ease-in-out infinite reverse; }
+.amb3 { position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(0deg,rgba(26,21,16,.8) 0%,transparent 100%); }
+@keyframes ambBreath { 0%,100%{opacity:.7} 50%{opacity:1.1} }
+
+/* Dust motes */
+.mote { position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,225,150,.75),transparent);filter:blur(1px);animation:moteDrift linear infinite;opacity:0; }
+@keyframes moteDrift {
+  0%{transform:translateY(100vh) translateX(0) scale(.4);opacity:0}
+  8%{opacity:1} 92%{opacity:.35}
+  100%{transform:translateY(-60px) translateX(var(--mx)) scale(1.1);opacity:0}
+}
+
+/* ── SCENE ── */
+.scene { position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:14px; }
+
+/* ── CARD OUTER ── */
+.card-outer {
+  position:relative; width:100%; max-width:480px;
+  transform-style:preserve-3d;
+  animation:cardIn 1.1s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes cardIn {
+  from{opacity:0;transform:perspective(1100px) rotateX(14deg) translateY(55px) scale(.91)}
+  to  {opacity:1;transform:perspective(1100px) rotateX(0)     translateY(0)    scale(1)}
+}
+.card-outer::after {
+  content:''; position:absolute;
+  left:10%;right:10%;bottom:-28px;height:50px;
+  background:radial-gradient(ellipse at 50% 50%,rgba(26,21,16,.65) 0%,transparent 70%);
+  filter:blur(16px); z-index:-1;
+}
+
+/* ── CARD ── */
+.card {
+  position:relative; background:var(--light);
+  border-radius:var(--r); overflow:hidden;
+  display:flex; flex-direction:column;
+  height:min(780px,93vh);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.05),
+    0 8px 28px rgba(26,21,16,.15),
+    0 36px 90px rgba(26,21,16,.24),
+    0 80px 160px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+/* ── HERO ── */
+.hero {
+  position:relative; height:138px; flex-shrink:0; overflow:hidden;
+  background:linear-gradient(155deg,#141026 0%,#0e1720 35%,#182414 55%,#1a1510 100%);
+}
+/* Sky gradient */
+.hero-sky { position:absolute;inset:0;background:linear-gradient(180deg,#0b1220 0%,#111e30 30%,#192a20 55%,#1a1510 100%); }
+/* Stars */
+.hero-stars { position:absolute;inset:0; }
+/* Moon */
+.hero-moon {
+  position:absolute;top:16px;right:28px;width:22px;height:22px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%,#fff9e8,#e8c870 55%,rgba(200,150,50,.25) 100%);
+  box-shadow:0 0 22px rgba(255,215,90,.45),0 0 70px rgba(255,200,80,.14);
+}
+.hero-moon::before { content:'';position:absolute;inset:-12px;border-radius:50%;background:radial-gradient(circle,rgba(255,220,100,.12),transparent 60%); }
+/* City silhouettes */
+.sil-l {
+  position:absolute;bottom:0;left:0;width:48%;height:78px;
+  background:linear-gradient(0deg,#1a1510 0%,#201a10 55%,transparent 100%);
+  clip-path:polygon(0 100%,0 45%,7% 45%,7% 22%,16% 22%,16% 38%,26% 38%,26% 52%,38% 52%,38% 28%,50% 28%,55% 100%);
+}
+.sil-r {
+  position:absolute;bottom:0;right:0;width:52%;height:78px;
+  background:linear-gradient(0deg,#1a1510 0%,#201a10 55%,transparent 100%);
+  clip-path:polygon(100% 100%,100% 38%,92% 38%,92% 18%,82% 18%,82% 38%,72% 38%,72% 48%,60% 48%,60% 28%,50% 28%,45% 100%);
+}
+/* Window lights on silhouettes */
+.sil-wins { position:absolute;bottom:0;left:0;right:0;height:78px; }
+/* Fade bottom */
+.hero-fade { position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,var(--light) 100%); }
+/* City name */
+.hero-label {
+  position:absolute;bottom:18px;left:0;right:0;text-align:center;
+}
+.hero-city { font-family:'Bodoni Moda',serif;font-style:italic;font-size:1.55rem;color:rgba(245,235,200,.9);letter-spacing:.08em;text-shadow:0 2px 20px rgba(0,0,0,.55); }
+.hero-line { font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(200,169,110,.75);margin-top:2px;font-weight:500; }
+
+/* ── BRAND BAR ── */
+.bbar {
+  padding:13px 20px 11px; flex-shrink:0;
+  background:var(--light); display:flex; align-items:center; justify-content:space-between;
+  position:relative; z-index:5;
+}
+.bbar::after { content:'';position:absolute;bottom:0;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,var(--cream3),rgba(200,169,110,.35),var(--cream3),transparent); }
+.brand-l { display:flex;align-items:center;gap:11px; }
+.logo {
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(145deg,var(--dark2),var(--dark));
+  display:flex;align-items:center;justify-content:center;font-size:19px;
+  box-shadow:0 4px 14px rgba(26,21,16,.3),0 0 0 1px rgba(200,169,110,.22),inset 0 1px 0 rgba(255,255,255,.07);
+  animation:logoWave 7s ease-in-out infinite; cursor:default;
+}
+@keyframes logoWave {
+  0%,100%{transform:rotate(0)} 15%{transform:rotate(-2deg)} 30%{transform:rotate(2deg)} 50%{transform:rotate(-1deg)} 65%{transform:rotate(1.5deg)}
+}
+.bname { font-family:'Bodoni Moda',serif;font-size:1.05rem;font-weight:600;color:var(--dark);letter-spacing:.03em;line-height:1.15; }
+.bname small { display:block;font-size:.59rem;font-family:'Jost',sans-serif;font-weight:400;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:1px; }
+.agent-pill {
+  display:flex;align-items:center;gap:7px;
+  background:var(--cream2);border:1px solid var(--cream3);border-radius:100px;
+  padding:5px 10px 5px 5px;cursor:default;transition:all .25s;
+}
+.agent-pill:hover { background:var(--cream);box-shadow:0 4px 16px var(--sh2); }
+.agent-av { width:28px;height:28px;border-radius:50%;background:linear-gradient(145deg,#3d6b50,#2a4d38);display:flex;align-items:center;justify-content:center;font-size:14px;position:relative; }
+.agent-av::after { content:'';position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:#22c55e;border:2px solid var(--cream2);box-shadow:0 0 7px rgba(34,197,94,.55); }
+.agent-inf { display:flex;flex-direction:column; }
+.agent-n { font-size:.7rem;font-weight:600;color:var(--dark);letter-spacing:.01em;line-height:1.2; }
+.agent-s { font-size:.57rem;color:#22c55e;letter-spacing:.05em; }
+
+/* ── STATS ── */
+.stats { display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--cream3);flex-shrink:0; }
+.stat { background:var(--light);padding:10px 6px;text-align:center;cursor:default;position:relative;overflow:hidden;transition:all .25s; }
+.stat::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--warm),transparent);transform:scaleX(0);transform-origin:center;transition:transform .3s; }
+.stat:hover::before { transform:scaleX(1); }
+.stat:hover { background:var(--cream2); }
+.sn { font-family:'Bodoni Moda',serif;font-size:.95rem;font-weight:600;color:var(--dark);line-height:1; }
+.sl { font-size:.54rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:3px; }
+
+/* ── MESSAGES ── */
+.messages {
+  flex:1; overflow-y:auto; padding:18px 16px 8px;
+  display:flex; flex-direction:column; gap:16px;
+  background:linear-gradient(180deg,#faf7f1 0%,var(--light) 100%);
+  position:relative; scroll-behavior:smooth;
+}
+.messages::before { content:'';position:absolute;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.022'/%3E%3C/svg%3E");opacity:.5; }
+.messages::-webkit-scrollbar { width:3px; }
+.messages::-webkit-scrollbar-thumb { background:var(--cream3);border-radius:3px; }
+.messages::-webkit-scrollbar-thumb:hover { background:var(--warm); }
+
+.mrow { display:flex;gap:10px;animation:rowSlide .45s cubic-bezier(.22,1,.36,1) both; }
+.mrow.usr { flex-direction:row-reverse; }
+@keyframes rowSlide { from{opacity:0;transform:translateY(18px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+.mav { width:36px;height:36px;border-radius:50%;flex-shrink:0;align-self:flex-end;display:flex;align-items:center;justify-content:center;font-size:16px;position:relative; }
+.mav-bot {
+  background:linear-gradient(145deg,var(--dark2),var(--dark));
+  box-shadow:0 4px 14px rgba(26,21,16,.25),0 0 0 2px rgba(200,169,110,.18);
+  animation:avPulse 4s ease-in-out infinite;
+}
+@keyframes avPulse {
+  0%,100%{box-shadow:0 4px 14px rgba(26,21,16,.25),0 0 0 2px rgba(200,169,110,.18)}
+  50%{box-shadow:0 4px 20px rgba(26,21,16,.3),0 0 0 3px rgba(200,169,110,.38)}
+}
+.mav-usr { background:linear-gradient(145deg,#3d6b50,#2a4d38);box-shadow:0 4px 14px rgba(42,77,56,.28); }
+
+.mbody { max-width:80%;display:flex;flex-direction:column;gap:4px; }
+.mrow.usr .mbody { align-items:flex-end; }
+
+.bbot {
+  background:#fff;border:1px solid var(--cream3);
+  border-radius:18px 18px 18px 4px;
+  padding:13px 16px;font-size:.875rem;line-height:1.75;color:var(--text);
+  box-shadow:0 2px 8px var(--sh2),0 8px 24px rgba(26,21,16,.06);
+  position:relative;overflow:hidden;
+}
+.bbot::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,169,110,.38),transparent); }
+.busr {
+  background:linear-gradient(145deg,var(--dark2),var(--dark3));
+  border-radius:18px 18px 4px 18px;
+  padding:13px 16px;font-size:.875rem;line-height:1.75;color:rgba(255,244,220,.9);font-weight:400;
+  box-shadow:0 4px 20px rgba(26,21,16,.34),inset 0 1px 0 rgba(255,255,255,.04);
+  position:relative;overflow:hidden;
+}
+.busr::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,169,110,.28),transparent); }
+.mtime { font-size:.57rem;color:var(--muted);padding:0 4px;letter-spacing:.04em; }
+
+/* ── WELCOME ── */
+.welcome {
+  background:#fff;border:1px solid var(--cream3);
+  border-left:3px solid var(--warm);
+  border-radius:4px 18px 18px 4px;
+  padding:18px 18px 16px;
+  box-shadow:0 2px 10px var(--sh2),0 14px 38px rgba(26,21,16,.07);
+  position:relative;overflow:hidden;
+}
+.welcome::after { content:'';position:absolute;top:-35px;right:-35px;width:110px;height:110px;background:radial-gradient(circle,rgba(200,169,110,.07),transparent 60%);border-radius:50%;pointer-events:none; }
+.w-badge {
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--dark2),var(--dark));
+  color:rgba(255,232,170,.9);border-radius:100px;
+  padding:4px 12px;font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:12px;font-weight:500;
+  box-shadow:0 4px 14px rgba(26,21,16,.24);
+}
+.wb-dot { width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:wbPulse 1.8s ease-in-out infinite; }
+@keyframes wbPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.55;transform:scale(1.5)} }
+.w-title { font-family:'Bodoni Moda',serif;font-size:1rem;color:var(--dark);margin-bottom:4px;letter-spacing:.01em;line-height:1.35; }
+.w-title em { font-style:italic;color:var(--warm2); }
+.w-sub { font-size:.76rem;color:var(--muted);margin-bottom:14px;line-height:1.65; }
+.w-items { display:flex;flex-direction:column;gap:10px; }
+.w-item { display:flex;align-items:flex-start;gap:11px;opacity:0;animation:wItemIn .5s ease both; }
+.w-item:nth-child(1){animation-delay:.45s}
+.w-item:nth-child(2){animation-delay:.68s}
+.w-item:nth-child(3){animation-delay:.91s}
+.w-item:nth-child(4){animation-delay:1.14s}
+@keyframes wItemIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+.wi-box {
+  width:32px;height:32px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(145deg,var(--cream),var(--cream2));
+  border:1px solid var(--cream3);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  box-shadow:0 2px 8px var(--sh2);transition:all .3s;cursor:default;
+}
+.w-item:hover .wi-box { background:linear-gradient(145deg,var(--dark2),var(--dark));transform:scale(1.12) rotate(7deg);box-shadow:0 6px 18px rgba(26,21,16,.22); }
+.wi-txt { display:flex;flex-direction:column;gap:2px; }
+.wi-txt strong { font-size:.77rem;color:var(--dark);font-weight:600; }
+.wi-txt span { font-size:.71rem;color:var(--muted);line-height:1.45; }
+
+/* ── TYPING ── */
+.typing-row { display:none;gap:10px; }
+.typing-row.on { display:flex;animation:rowSlide .3s ease; }
+.typing-bub {
+  background:#fff;border:1px solid var(--cream3);
+  border-radius:18px 18px 18px 4px;
+  padding:14px 18px;display:flex;gap:5px;align-items:center;
+  box-shadow:0 2px 8px var(--sh2);
+}
+.td { width:8px;height:8px;border-radius:50%;background:var(--cream3); }
+.td:nth-child(1){animation:tdB 1.4s ease-in-out infinite}
+.td:nth-child(2){animation:tdB 1.4s ease-in-out infinite .19s}
+.td:nth-child(3){animation:tdB 1.4s ease-in-out infinite .38s}
+@keyframes tdB { 0%,100%{transform:translateY(0) scale(1);background:var(--cream3)} 50%{transform:translateY(-8px) scale(1.12);background:var(--warm);box-shadow:0 4px 10px rgba(200,169,110,.4)} }
+
+/* ── QUICK CHIPS ── */
+.qstrip {
+  padding:8px 16px 10px;display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0;
+  background:linear-gradient(0deg,var(--cream2),var(--light));
+  border-top:1px solid var(--cream3);
+}
+.qchip {
+  background:#fff;border:1px solid var(--cream3);color:#3d3530;
+  padding:7px 14px;border-radius:100px;
+  font-size:.71rem;font-family:'Jost',sans-serif;font-weight:500;
+  cursor:pointer;white-space:nowrap;letter-spacing:.03em;
+  transition:all .22s;box-shadow:0 1px 4px var(--sh2);position:relative;overflow:hidden;
+}
+.qchip::before { content:'';position:absolute;inset:0;border-radius:100px;background:linear-gradient(135deg,rgba(255,255,255,.7) 0%,transparent 60%);pointer-events:none; }
+.qchip:hover { background:var(--dark);color:rgba(255,232,175,.9);border-color:var(--dark);transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,21,16,.22); }
+.qchip:active { transform:scale(.97); }
+
+/* ── INPUT ── */
+.input-zone {
+  padding:11px 14px 16px;flex-shrink:0;
+  background:var(--cream2);border-top:1px solid var(--cream3);
+}
+.input-wrap {
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border:1.5px solid var(--cream3);border-radius:16px;
+  padding:7px 7px 7px 18px;transition:all .3s;
+  box-shadow:0 2px 8px var(--sh2),inset 0 1px 0 rgba(255,255,255,.85);
+}
+.input-wrap:focus-within { border-color:var(--warm);box-shadow:0 2px 8px var(--sh2),0 0 0 3px rgba(200,169,110,.12); }
+.ifield { flex:1;background:transparent;border:none;outline:none;font-size:.875rem;font-family:'Jost',sans-serif;color:var(--text);padding:8px 0; }
+.ifield::placeholder { color:#c8b99a; }
+.send-btn {
+  width:44px;height:44px;border-radius:13px;flex-shrink:0;
+  background:linear-gradient(145deg,var(--dark2),var(--dark));
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;position:relative;overflow:hidden;
+  box-shadow:0 4px 14px rgba(26,21,16,.32),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.send-btn::before { content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(200,169,110,.14),transparent);transition:left .4s; }
+.send-btn:hover::before { left:100%; }
+.send-btn:hover { transform:translateY(-2px) scale(1.05);box-shadow:0 8px 24px rgba(26,21,16,.42); }
+.send-btn:active { transform:scale(.97); }
+.send-btn svg { width:18px;height:18px;fill:rgba(255,232,175,.9);position:relative;z-index:1; }
+.ifoot { display:flex;justify-content:center;gap:14px;margin-top:8px; }
+.if-item { font-size:.59rem;color:#c0ad8e;display:flex;align-items:center;gap:4px;letter-spacing:.05em;text-transform:uppercase; }
+.if-sep { width:2px;height:2px;border-radius:50%;background:#c0ad8e; }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed;bottom:22px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--dark);color:rgba(255,238,200,.92);
+  border:1px solid rgba(200,169,110,.22);
+  border-radius:12px;padding:11px 20px;
+  font-size:.77rem;letter-spacing:.02em;
+  box-shadow:0 16px 50px rgba(0,0,0,.4);
+  z-index:9000;transition:transform .4s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.on { transform:translateX(-50%) translateY(0); }
+.t-dot { width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;flex-shrink:0; }
+
+/* ── RIPPLE EFFECT ── */
+.ripple {
+  position:absolute;border-radius:50%;
+  background:rgba(200,169,110,.25);
+  transform:scale(0);animation:rippleOut .5s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes rippleOut { to{transform:scale(4);opacity:0} }
 </style>
 </head>
 <body>
-<div class="chat-box">
-  <div class="header">
-    <div class="header-top">
-      <div class="avatar">🏠</div>
-      <div>
-        <h2>Dream Home Realty</h2>
-        <p>AI Property Assistant</p>
-      </div>
-    </div>
-    <div class="status">
-      <div class="dot"></div> Online — Replies instantly
-    </div>
-  </div>
-  <div class="messages" id="messages">
-    <div class="msg bot">
-      👋 Welcome to Dream Home Realty!<br><br>
-      I can help you with:<br>
-      🏠 Buying or selling property<br>
-      🔑 Rentals in Ahmedabad<br>
-      💰 Price and loan information<br><br>
-      How can I assist you today?
-    </div>
-  </div>
-  <div class="typing" id="typing">
-    <span></span><span></span><span></span>
-  </div>
-  <div class="quick-btns">
-    <button class="quick-btn" onclick="quickSend('I want to buy a property')">🏠 Buy</button>
-    <button class="quick-btn" onclick="quickSend('I want to rent a property')">🔑 Rent</button>
-    <button class="quick-btn" onclick="quickSend('What are your price ranges?')">💰 Prices</button>
-    <button class="quick-btn" onclick="quickSend('I need home loan help')">🏦 Loans</button>
-  </div>
-  <div class="input-row">
-    <input type="text" id="userInput" placeholder="Ask about properties..." onkeypress="if(event.key==='Enter') sendMessage()"/>
-    <button class="send-btn" onclick="sendMessage()">➤</button>
-  </div>
+
+<div id="cd"><div></div></div>
+<div id="cr"></div>
+
+<div id="bg">
+  <div class="bg-base"></div>
+  <canvas id="bgCanvas"></canvas>
+  <div class="noise"></div>
+  <div class="amb1"></div>
+  <div class="amb2"></div>
+  <div class="amb3"></div>
 </div>
+
+<div class="scene">
+ <div class="card-outer" id="cardOuter">
+  <div class="card">
+
+   <!-- HERO -->
+   <div class="hero">
+     <div class="hero-sky"></div>
+     <div class="hero-stars" id="heroStars"></div>
+     <div class="hero-moon"></div>
+     <div class="sil-l"></div>
+     <div class="sil-r"></div>
+     <canvas id="winCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+     <div class="hero-fade"></div>
+     <div class="hero-label">
+       <div class="hero-city">Ahmedabad</div>
+       <div class="hero-line">Where Dreams Find Address</div>
+     </div>
+   </div>
+
+   <!-- BRAND -->
+   <div class="bbar">
+     <div class="brand-l">
+       <div class="logo">🏛️</div>
+       <div class="bname">Dream Home Realty<small>Premium Properties &middot; Est. 2008</small></div>
+     </div>
+     <div class="agent-pill">
+       <div class="agent-av">🧑‍💼</div>
+       <div class="agent-inf">
+         <div class="agent-n">AI Concierge</div>
+         <div class="agent-s">Online Now</div>
+       </div>
+     </div>
+   </div>
+
+   <!-- STATS -->
+   <div class="stats">
+     <div class="stat"><div class="sn">500+</div><div class="sl">Properties</div></div>
+     <div class="stat"><div class="sn">15+</div><div class="sl">Locations</div></div>
+     <div class="stat"><div class="sn">24/7</div><div class="sl">Support</div></div>
+     <div class="stat"><div class="sn">&#x20B9;25L+</div><div class="sl">Starting</div></div>
+   </div>
+
+   <!-- MESSAGES -->
+   <div class="messages" id="msgs">
+     <div class="mrow bot">
+       <div class="mav mav-bot">🏛️</div>
+       <div class="mbody">
+         <div class="welcome">
+           <div class="w-badge"><div class="wb-dot"></div>Live Concierge</div>
+           <div class="w-title">Good evening. I'm your <em>personal property guide.</em></div>
+           <div class="w-sub">Tell me what you're looking for and I'll help you find the perfect home in Ahmedabad.</div>
+           <div class="w-items">
+             <div class="w-item"><div class="wi-box">🏠</div><div class="wi-txt"><strong>Buy or Rent</strong><span>Residential &amp; commercial across 15+ premium areas</span></div></div>
+             <div class="w-item"><div class="wi-box">🏦</div><div class="wi-txt"><strong>Home Loan Desk</strong><span>SBI, HDFC, ICICI — pre-approved in 48 hrs</span></div></div>
+             <div class="w-item"><div class="wi-box">📅</div><div class="wi-txt"><strong>Free Site Visits</strong><span>Private viewings arranged within 24 hours</span></div></div>
+             <div class="w-item"><div class="wi-box">📋</div><div class="wi-txt"><strong>Legal Assistance</strong><span>End-to-end paperwork and documentation</span></div></div>
+           </div>
+         </div>
+         <div class="mtime" id="wtime"></div>
+       </div>
+     </div>
+   </div>
+
+   <div class="typing-row" id="typing">
+     <div class="mav mav-bot">🏛️</div>
+     <div class="typing-bub"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+   </div>
+
+   <div class="qstrip" id="qstrip">
+     <button class="qchip" onclick="qs('I want to buy a 3BHK flat')">🏠 Buy 3BHK</button>
+     <button class="qchip" onclick="qs('Show rental options under 25000 per month')">🔑 Rent</button>
+     <button class="qchip" onclick="qs('Properties in Bodakdev and Satellite')">📍 Bodakdev</button>
+     <button class="qchip" onclick="qs('Help with home loan eligibility')">🏦 Loan</button>
+     <button class="qchip" onclick="qs('Book a free site visit this weekend')">📅 Visit</button>
+   </div>
+
+   <div class="input-zone">
+     <div class="input-wrap" id="inputWrap">
+       <input class="ifield" id="inp" type="text" placeholder="Describe your dream home…" autocomplete="off" onkeypress="if(event.key==='Enter')doSend()"/>
+       <button class="send-btn" id="sendBtn" onclick="doSend()">
+         <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
+       </button>
+     </div>
+     <div class="ifoot">
+       <span class="if-item">🔒 Private</span><span class="if-sep"></span>
+       <span class="if-item">⚡ Instant</span><span class="if-sep"></span>
+       <span class="if-item">🤖 AI Powered</span>
+     </div>
+   </div>
+
+  </div>
+ </div>
+</div>
+
+<div class="toast" id="toast"><div class="t-dot"></div><span id="tmsg"></span></div>
+
 <script>
-  let history = [];
-  async function sendMessage() {
-    const input = document.getElementById('userInput');
-    const msg = input.value.trim();
-    if (!msg) return;
-    addMsg(msg, 'user');
-    input.value = '';
-    showTyping(true);
-    try {
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({message: msg, history: history})
-      });
-      const data = await res.json();
-      showTyping(false);
-      addMsg(data.reply, 'bot');
-      history.push(
-        {role:'user', parts:[{text: msg}]},
-        {role:'model', parts:[{text: data.reply}]}
-      );
-    } catch(e) {
-      showTyping(false);
-      addMsg('Sorry, please call us directly!', 'bot');
-    }
+/* ── CURSOR ── */
+const cd=document.getElementById('cd'), cr=document.getElementById('cr');
+let mx=0,my=0,ox=0,oy=0;
+document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; cd.style.cssText=`left:${mx}px;top:${my}px`; });
+(function cl(){ ox+=(mx-ox)*.13; oy+=(my-oy)*.13; cr.style.left=ox+'px'; cr.style.top=oy+'px'; requestAnimationFrame(cl); })();
+
+/* ── HERO STARS ── */
+const hs=document.getElementById('heroStars');
+const starStyle=document.createElement('style');
+starStyle.textContent='@keyframes tw{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}';
+document.head.appendChild(starStyle);
+for(let i=0;i<70;i++){
+  const s=document.createElement('div');
+  const sz=Math.random()*1.8+.4;
+  s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:rgba(255,248,220,${.35+Math.random()*.65});top:${Math.random()*82}%;left:${Math.random()*100}%;animation:tw ${2+Math.random()*4}s ease-in-out infinite;animation-delay:${Math.random()*5}s;`;
+  hs.appendChild(s);
+}
+
+/* ── HERO WINDOW CANVAS ── */
+const wc=document.getElementById('winCanvas');
+const wctx=wc.getContext('2d');
+const heroEl=document.querySelector('.hero');
+let wW,wH,heroWins=[];
+function setupHeroWins(){
+  wW=wc.width=heroEl.offsetWidth; wH=wc.height=heroEl.offsetHeight;
+  heroWins=[];
+  // Left silhouette windows
+  const lwPos=[[.04,.48,.10,.65,.17,.25,.18,.42],[.26,.55]];
+  // Generate window positions on both sides
+  const winData=[
+    // left side
+    {x:.02,y:.5,w:.04,h:.06},{x:.03,y:.35,w:.03,h:.05},{x:.10,y:.3,w:.03,h:.05},{x:.11,y:.45,w:.03,h:.05},{x:.18,y:.28,w:.03,h:.05},{x:.19,y:.42,w:.03,h:.05},{x:.27,y:.58,w:.03,h:.04},
+    // right side
+    {x:.73,y:.5,w:.03,h:.05},{x:.74,y:.36,w:.03,h:.05},{x:.82,y:.22,w:.03,h:.05},{x:.83,y:.38,w:.03,h:.05},{x:.72,y:.62,w:.03,h:.04},{x:.89,y:.42,w:.03,h:.05},{x:.9,y:.28,w:.03,h:.05},{x:.95,y:.42,w:.03,h:.05}
+  ];
+  winData.forEach(d=>{
+    heroWins.push({x:d.x,y:d.y,w:d.w,h:d.h,lit:Math.random()>.38,flick:Math.random()>.75,warm:Math.random()>.4,t:Math.random()*200});
+  });
+}
+let hf=0;
+function drawHeroWins(){
+  wctx.clearRect(0,0,wW,wH); hf++;
+  heroWins.forEach(w=>{
+    w.t++;
+    if(w.flick && w.t%160===0) w.lit=!w.lit;
+    if(!w.lit) return;
+    const px=w.x*wW, py=w.y*wH, pw=w.w*wW, ph=w.h*wH;
+    const g=wctx.createRadialGradient(px+pw/2,py+ph/2,0,px+pw/2,py+ph/2,Math.max(pw,ph)*1.2);
+    if(w.warm){g.addColorStop(0,'rgba(255,215,80,.9)');g.addColorStop(.5,'rgba(200,155,40,.4)');}
+    else{g.addColorStop(0,'rgba(180,220,255,.85)');g.addColorStop(.5,'rgba(100,175,240,.3)');}
+    g.addColorStop(1,'transparent');
+    wctx.fillStyle=g; wctx.fillRect(px-pw*.5,py-ph*.5,pw*2,ph*2);
+    wctx.fillStyle=w.warm?'rgba(255,215,80,.85)':'rgba(180,220,255,.8)';
+    wctx.fillRect(px,py,pw,ph);
+  });
+  requestAnimationFrame(drawHeroWins);
+}
+window.addEventListener('resize',setupHeroWins);
+setupHeroWins(); drawHeroWins();
+
+/* ── BG BOKEH CANVAS ── */
+const bgC=document.getElementById('bgCanvas');
+const bctx=bgC.getContext('2d');
+let BW,BH,bokeh=[];
+function resizeBg(){
+  BW=bgC.width=window.innerWidth; BH=bgC.height=window.innerHeight;
+  bokeh=Array.from({length:16},()=>({
+    x:Math.random()*BW,y:Math.random()*BH,
+    r:35+Math.random()*90,
+    vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.09,
+    a:Math.random()*Math.PI*2,sp:.003+Math.random()*.005,
+    warm:Math.random()>.4
+  }));
+}
+(function drawBg(){
+  bctx.clearRect(0,0,BW,BH);
+  bokeh.forEach(b=>{
+    b.a+=b.sp; b.x+=b.vx; b.y+=b.vy;
+    if(b.x<-b.r)b.x=BW+b.r; if(b.x>BW+b.r)b.x=-b.r;
+    if(b.y<-b.r)b.y=BH+b.r; if(b.y>BH+b.r)b.y=-b.r;
+    const al=.02+Math.abs(Math.sin(b.a))*.035;
+    const c=b.warm?'205,162,80':'165,142,98';
+    const g=bctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+    g.addColorStop(0,`rgba(${c},${al})`); g.addColorStop(1,'transparent');
+    bctx.fillStyle=g; bctx.fillRect(b.x-b.r,b.y-b.r,b.r*2,b.r*2);
+  });
+  requestAnimationFrame(drawBg);
+})();
+window.addEventListener('resize',resizeBg); resizeBg();
+
+/* ── DUST MOTES ── */
+for(let i=0;i<14;i++){
+  const m=document.createElement('div'); m.className='mote';
+  const sz=.8+Math.random()*2.2;
+  m.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${14+Math.random()*20}s;animation-delay:${Math.random()*16}s;--mx:${(Math.random()-.5)*130}px;`;
+  document.getElementById('bg').appendChild(m);
+}
+
+/* ── 3D TILT ── */
+const co=document.getElementById('cardOuter');
+let tx=0,ty=0,cx2=0,cy2=0;
+document.addEventListener('mousemove',e=>{ tx=(e.clientX-window.innerWidth/2)/(window.innerWidth/2)*3.5; ty=(e.clientY-window.innerHeight/2)/(window.innerHeight/2)*-2.5; });
+document.addEventListener('mouseleave',()=>{tx=0;ty=0;});
+(function tl(){ cx2+=(tx-cx2)*.07; cy2+=(ty-cy2)*.07; co.style.transform=`perspective(1100px) rotateY(${cx2}deg) rotateX(${cy2}deg)`; requestAnimationFrame(tl); })();
+
+/* ── RIPPLE ON SEND BTN ── */
+document.getElementById('sendBtn').addEventListener('click',function(e){
+  const r=document.createElement('div'); r.className='ripple';
+  const rect=this.getBoundingClientRect();
+  const sz=Math.max(rect.width,rect.height);
+  r.style.cssText=`width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px;`;
+  this.appendChild(r); setTimeout(()=>r.remove(),500);
+});
+
+/* ── INPUT KEYSTROKE GLOW ── */
+document.getElementById('inp').addEventListener('keydown',e=>{
+  if(e.key.length===1||e.key==='Backspace'){
+    const iw=document.getElementById('inputWrap');
+    iw.style.borderColor='rgba(200,169,110,.75)';
+    setTimeout(()=>{ iw.style.borderColor=''; },110);
   }
-  function quickSend(msg) {
-    document.getElementById('userInput').value = msg;
-    sendMessage();
+});
+
+/* ── CHAT ── */
+let history=[];
+document.getElementById('wtime').textContent=getTime();
+function getTime(){ return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+
+async function doSend(){
+  const inp=document.getElementById('inp');
+  const msg=inp.value.trim(); if(!msg) return;
+  document.getElementById('qstrip').style.display='none';
+  addMsg(msg,'usr'); inp.value=''; setTyping(true);
+  try{
+    const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history})});
+    const data=await res.json();
+    setTyping(false); addMsg(data.reply,'bot');
+    history.push({role:'user',content:msg},{role:'assistant',content:data.reply});
+  }catch(e){
+    setTyping(false);
+    addMsg('I seem to have lost connection. Please try again in a moment.','bot');
   }
-  function addMsg(text, type) {
-    const div = document.createElement('div');
-    div.className = `msg ${type}`;
-    div.textContent = text;
-    document.getElementById('messages').appendChild(div);
-    div.scrollIntoView({behavior:'smooth'});
-  }
-  function showTyping(show) {
-    const t = document.getElementById('typing');
-    t.style.display = show ? 'flex' : 'none';
-    if(show) t.scrollIntoView({behavior:'smooth'});
-  }
+}
+function qs(m){ document.getElementById('inp').value=m; doSend(); }
+
+function addMsg(text,type){
+  const msgs=document.getElementById('msgs');
+  const row=document.createElement('div'); row.className=`mrow ${type}`;
+  const av=document.createElement('div'); av.className=`mav ${type==='bot'?'mav-bot':'mav-usr'}`; av.textContent=type==='bot'?'🏛️':'👤';
+  const body=document.createElement('div'); body.className='mbody';
+  if(type==='usr') body.style.alignItems='flex-end';
+  const bub=document.createElement('div'); bub.className=type==='bot'?'bbot':'busr'; bub.textContent=text;
+  const t=document.createElement('div'); t.className='mtime'; t.textContent=getTime();
+  body.appendChild(bub); body.appendChild(t);
+  if(type==='bot'){row.appendChild(av);row.appendChild(body);}else{row.appendChild(body);row.appendChild(av);}
+  msgs.appendChild(row); row.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+function setTyping(on){
+  const t=document.getElementById('typing'); t.classList.toggle('on',on);
+  if(on) t.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+/* ── TOAST ── */
+function showToast(msg){
+  const el=document.getElementById('toast'); document.getElementById('tmsg').textContent=msg;
+  el.classList.add('on'); setTimeout(()=>el.classList.remove('on'),4200);
+}
+
+/* Greeting based on time */
+const h=new Date().getHours();
+const greet=h<12?'Good morning':'h<17?''Good afternoon':'Good evening';
+setTimeout(()=>showToast(`${h<12?'Good morning':h<17?'Good afternoon':'Good evening'} \u2014 Ready to find your dream home?`),1500);
 </script>
 </body>
 </html>
