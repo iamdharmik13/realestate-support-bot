@@ -32,7 +32,7 @@ def chat():
         data = request.json
         user_message = data.get("message", "")
 
-        model = genai.GenerativeModel("gemini-2.0-flash-lite")
+        model = genai.GenerativeModel("gemini-2.5-flash-preview-04-17")
         
         full_message = f"{SYSTEM_PROMPT}\n\nVisitor: {user_message}"
         
