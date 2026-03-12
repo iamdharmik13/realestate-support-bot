@@ -1,11 +1,10 @@
 import os
-import json
-import urllib.request
 from flask import Flask, request, jsonify, render_template
+from groq import Groq
 
 app = Flask(__name__)
 
-API_KEY = os.environ.get("GEMINI_API_KEY", "")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
 
 with open("knowledge.txt", "r") as f:
     knowledge = f.read()
@@ -31,29 +30,16 @@ def chat():
         data = request.json
         user_message = data.get("message", "")
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={API_KEY}"
-
-        payload = json.dumps({
-            "contents": [
-                {
-                    "parts": [
-                        {"text": f"{SYSTEM_PROMPT}\n\nVisitor: {user_message}"}
-                    ]
-                }
-            ]
-        }).encode("utf-8")
-
-        req = urllib.request.Request(
-            url,
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST"
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=500
         )
 
-        with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode("utf-8"))
-            reply = result["candidates"][0]["content"]["parts"][0]["text"]
-
+        reply = response.choices[0].message.content
         return jsonify({"reply": reply, "status": "success"})
 
     except Exception as e:
