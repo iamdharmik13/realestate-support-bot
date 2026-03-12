@@ -9,7 +9,7 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 with open("knowledge.txt", "r") as f:
     knowledge = f.read()
     
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 SYSTEM_PROMPT = f"""
 You are a professional real estate assistant.
